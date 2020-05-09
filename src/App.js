@@ -1,24 +1,21 @@
 import React from 'react';
-import logo from './logo.svg';
+
+import { usePersistentCanvas } from "./hooks/usePersistentCanvas"
 import './App.css';
 
 function App() {
+  const [locations, setLocations, canvasRef] = usePersistentCanvas()
+  function handleCanvasClick(e) {
+    setLocations([...locations, { x: e.clientX, y: e.clientY }])
+  }
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+     <canvas
+          ref={canvasRef}
+          width={window.innerWidth}
+          height={window.innerHeight}
+          onClick={handleCanvasClick}
+        /> 
     </div>
   );
 }
