@@ -3772,6 +3772,11 @@ dotenv@8.2.0:
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-8.2.0.tgz#97e619259ada750eea3e4ea3e26bceea5424b16a"
   integrity sha512-8sJ78ElpbDJBHNeBzUbUVLsqKdccaa/BXF1uPTw3GrvQTBgrQrtObr2mUrE38vzYd8cEv+m/JBfDLioYcfXoaw==
 
+draw-shape-reactjs@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/draw-shape-reactjs/-/draw-shape-reactjs-1.0.2.tgz#8527e63cc6f42e409eb5d47e183324338ec06bc0"
+  integrity sha512-FEaXp9jj5hpAiJVQ8jks3JTySMaFRejsGIsdbk5Le7pAJ9cKvatmCbkKLbCXRzBDKs850lxenq/wYmHR2RjV4Q==
+
 duplexer@^0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/duplexer/-/duplexer-0.1.1.tgz#ace6ff808c1ce66b57d1ebf97977acb02334cfc1"
