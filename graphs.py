@@ -53,56 +53,73 @@ def getCombinationsHelper(combinations, array, index, num, reducedNum):
     getCombinationsHelper(combinations, array, index+1, num, reducedNum-k)
 
 def printGraph(height, width, colors):
-  visited = [[False for col in range(width)] for row in range(height)]
-  matrix = [['' for col in range(width)] for row in range(height)]
-  start_j = random.randint(0, width-1) # col
-  start_i = random.choice([0, height-1]) if start_j > 0 and start_j < width else random.randint(0, height-1) # row
-  start = [start_i, start_j]
-  combinations = random.choice(getCombinations(height * width))
-  combinations.sort(reverse=True)
-  print("combinations: {}".format(combinations))
-  combinations=[4,4,1]
+  choices = getCombinations(height * width)
+
+  for attempt in range(100):
+    segments = random.choice(choices)
+    segments.sort(reverse=True)
+    start_j = random.randint(0, width-1) # col
+    start_i = random.choice([0, height-1]) if start_j > 0 and start_j < width else random.randint(0, height-1) # row
+    start = [start_i, start_j]
+    graph, err = createGraph(start, segments, colors) 
+    if err:
+      print("graph invalid at attempt {}".format(attempt))
+      break
+  for i in range(height):
+    for j in range(width):
+      print("{}x{}".format(getColor(graph[i][j]), getColor(graph[i][j])), end="")
+    print("")
+
+def createGraph(start, segments, colors):
+  """
+  create graph
+  """
+  
+  if len(segments) != len(colors):
+    raise Exception("need unique color for each segment")
+  print("segments: {}".format(segments))
+  visited = [[False for col in range(len(segments))] for row in range(len(segments))]
+  graph = [['' for col in range(len(segments))] for row in range(len(segments))]
   nextNodes = []
-  for i in range(len(combinations)):
-    segment = combinations[i]
-    nextSegment = combinations[i+1] if i < len(combinations) - 1 else 0
+  for i in range(len(segments)):
+    segment = segments[i]
+    nextSegment = sum(segments[i+1:]) if i < len(segments) - 1 else 0
     if len(nextNodes):
     # two edges cases:
     # 1. check if next starting point has sufficient space for the next segment
     # 2. may be solved by 1. but need to have visibility on last segment start point
       foundValid = False
       for node in nextNodes:
-        if isValidStartingNode(node, visited, matrix, segment):
+        if isValidStartingNode(node, visited, graph, segment):
           start = node
           foundValid = True
           break
       if not foundValid:
         print("warning:couldnt-find-valid-stating-node:{}".format(nextNodes))
+        return graph, True 
     # need to know about next segment when creating the current segment in order to ensure
     # as a segment is constructed that we are always leaving sufficient space for the next segment
     # TODO: add this check in createSegment function
-    rem = createSegment(visited, matrix, start, segment, nextSegment, colors[i])
+    rem = createSegment(visited, graph, start, segment, nextSegment, colors[i])
     for node in rem:
       nextNodes.append(node)
-   
+  return graph, False
 
-
-  for i in range(height):
-    for j in range(width):
-      print("{}x{}".format(getColor(matrix[i][j]), getColor(matrix[i][j])), end="")
-    print("")
-def isValidStartingNode(node, visited, matrix, segmentSize):
+def isValidStartingNode(node, visited, matrix, segment):
   """
   responsible for checking if a given starting point will be viable for a segment
+  needs to check:
+  1. that the given starting node AND the subsequent next nodes will be valid
+  2. 
   """
   nodesAvailable = [node]
-  print("nodesAvailable:{}:segment:{}".format(nodesAvailable, segmentSize))
-  print(visited)
+  # print("nodesAvailable:{}:segment:{}".format(nodesAvailable, segmentSize))
+  # print(visited)
   currentSize = 0
   tmpVisited = copy.deepcopy(visited)
-  while len(nodesAvailable) and currentSize < segmentSize:
+  while len(nodesAvailable) and currentSize < segment:
     currentNode = nodesAvailable.pop()
-    print(currentNode)
+    # print(currentNode)
     i = currentNode[0]
     j = currentNode[1]
     if tmpVisited[i][j]:
@@ -111,17 +128,21 @@ def isValidStartingNode(node, visited, matrix, segmentSize):
     currentSize += 1
     nextNodes = getNextSegmentNode(i, j, matrix, tmpVisited)
     for node in nextNodes:
+      i = node[0]
+      j = node[1]
       nodesAvailable.append(node)
-  if currentSize >= segmentSize:
+  if currentSize >= segment:
     return True
   else:
     return False
-def createSegment(visited, matrix, start, size, nextSize, color):
+
+def createSegment(visited, matrix, start, size, nextSegment, color):
   """
   walk the matrix and create a segment of given size
   """
   print("---segment:color:{}---".format(color))
   print("---segment:start:{}---".format(start))
+  print("---segment:size:{}---".format(size))
   nodesToPaint = [start]
   currentSize = 0
   unpaintedNodes = []
@@ -133,60 +154,63 @@ def createSegment(visited, matrix, start, size, nextSize, color):
     # check if this node is a valid node to paint
     if visited[i][j]:
       continue
-    while not isValidNode(i, j, matrix, visited, nextSize) and len(nodesToPaint):
-      print("warning invalid node: {}".format(currentNode))
-      currentNode = nodesToPaint.pop()
-      unpaintedNodes.append(currentNode)
-      i = currentNode[0]
-      j = currentNode[1]
-    # if not isValidNode(i, j, matrix, visited, nextSize):
+    if nextSegment:
+      # edge cases:
+      # 1. the node checked needs to factor in it might be last node of the segment
+      # 2. the checking of remaining space for the next segment needs to be done not just
+      #    for neighboring nodes of the given node but all unvisited remaining nodes unpainted
+      # 3. play through creating remaining segments and validate its possible given paining the current
+      #    node.
+      while not isValidNode(i, j, matrix, visited, nextSegment) and len(nodesToPaint):
+        print("warning invalid node: {}".format(currentNode))
+        currentNode = nodesToPaint.pop()
+        unpaintedNodes.append(currentNode)
+        i = currentNode[0]
+        j = currentNode[1]
+    print("found node at ({},{}) valid".format(i, j))
+    # if not isValidNode(i, j, matrix, visited, nextSegment):
     #   print("warning invalid node: {}".format(currentNode))
     visited[i][j] = True
     
     matrix[i][j] = color
     currentSize += 1
-    options = getNextSegmentNode(i, j, matrix, visited, nextSize)
+    options = getNextSegmentNode(i, j, matrix, visited)
     
     for option in options:
       nodesToPaint.append(option)
-  print("nodesToPaint: {}".format(nodesToPaint))
-  print("unpaintedNodes: {}".format(unpaintedNodes))
+  # print("nodesToPaint: {}".format(nodesToPaint))
+  # print("unpaintedNodes: {}".format(unpaintedNodes))
   return nodesToPaint + unpaintedNodes
-def isValidNode(i, j, matrix, visited, nextSegmentsize):
+
+def isValidNode(i, j, matrix, visited, nextSegment):
   """
   will check that IF this node is painted will there be space for the next segment (size)
   """
-  print("checking i: {}, j: {}, for next segment: {}".format(i, j, nextSegmentsize))
+  print("checking i: {}, j: {}, for remaining segments: {}".format(i, j, nextSegment))
   tmpVisited = copy.deepcopy(visited)
   tmpVisited[i][j] = True
   options = getNextSegmentNode(i, j, matrix, tmpVisited)
-  print(options)
-  options = list(filter(lambda x: isValidStartingNode(x, tmpVisited, matrix, nextSegmentsize), options))
+  if not options:
+    return True
+  options = list(filter(lambda x: isValidStartingNode(x, tmpVisited, matrix, nextSegment), options))
   if len(options) > 0:
-    print(matrix)
-    print(tmpVisited)
-    print(options)
     return True
   else:
     return False
-def getNextSegmentNode(i, j, matrix, visited, nextSize = None):
+
+def getNextSegmentNode(i, j, matrix, visited):
   """
   randomly select next node to pain
   """
   options = []
-  if i > 0 and not visited[i-1][j]:
-    options.append([i-1, j])
-  if i < len(matrix) - 1 and not visited[i+1][j]:
-    options.append([i+1, j])
   if j > 0 and not visited[i][j-1]:
     options.append([i, j-1])
   if j < len(matrix[0]) - 1 and not visited[i][j+1]:
     options.append([i, j+1])
-  # filter invalid options based on next size
-  # if nextSize:
-  #   options = list(filter(lambda x: isValidStartingNode(x, visited, matrix, nextSize), options))
-  # if not len(options) and nextSize:
-  #   print("warning filtered all results for nextSize: {}".format(nextSize))
+  if i > 0 and not visited[i-1][j]:
+    options.append([i-1, j])
+  if i < len(matrix) - 1 and not visited[i+1][j]:
+    options.append([i+1, j])
   random.shuffle(options)
   return options
 
