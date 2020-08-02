@@ -8,6 +8,13 @@ locally you can generate and view graphs by running locally with:
 ```bash
 python3 graphs.py
 ```
+will produce:
+
+...
+
+![output](./assets/output.png)
+
+...
 
 which will produce a colorised graph of 3 distinct segments of varying sizes
 

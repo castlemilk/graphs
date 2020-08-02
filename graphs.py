@@ -66,7 +66,7 @@ def printGraph(height, width, colors):
     start = [start_i, start_j]
     graph, err = paintGraph(graph, visited, start, segments, colors) 
     if err:
-      # print("graph invalid at attempt {} for {}".format(attempt, segments))
+      print("graph invalid at attempt {} for {}".format(attempt, segments))
       break
     for i in range(height):
       for j in range(width):
@@ -223,4 +223,5 @@ def getNextSegmentNode(i, j, matrix, visited):
 
 if __name__ == "__main__":
 
-  printGraph(3, 3,['r', 'g', 'b']) 
+  # printGraph(3, 3,['r', 'g', 'b']) 
+  printGraph(3, 3,['r', 'g', 'b'])
