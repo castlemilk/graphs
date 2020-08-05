@@ -26,6 +26,6 @@ jobs:
           config-name: release-drafter.yml
           version: ${{ steps.get_version.outputs.VERSION }}
           tag: ${{ steps.get_version.outputs.TAG }}
-          prerelease: contains(github.ref, "refs/tags") && contains(github.ref "-rc.") 
+          # prerelease: contains(github.ref, "refs/tags") && contains(github.ref "-rc.") 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
