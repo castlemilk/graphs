@@ -8,6 +8,7 @@ locally you can generate and view graphs by running locally with:
 ```bash
 python3 graphs.py
 ```
+
 will produce:
 
 ...
