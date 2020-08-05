@@ -24,7 +24,7 @@ jobs:
         with:
           # (Optional) specify config name to use, relative to .github/. Default: release-drafter.yml
           config-name: release-drafter.yml
-          version: ${{ steps.get_version.outputs.VERSION }}
+          version: ${{ steps.get_version.outputs.TAG }}
           tag: ${{ steps.get_version.outputs.TAG }}
           prerelease: contains(github.ref, "refs/tags") && contains(github.ref "-rc.")
           publish: contains(github.ref, "refs/tags") && !contains(github.ref "-rc.") 
